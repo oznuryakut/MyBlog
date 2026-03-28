@@ -1,0 +1,19 @@
+<footer>
+  <div class="footer-inner">
+    <p>© 2026 Blog. Tüm hakları saklıdır.</p>
+  </div>
+</footer>
+<script>
+async function begenYorum(id, btn) {
+  const res = await fetch('/yorum/' + id + '/begen', { method: 'POST' });
+  const data = await res.json();
+  if (data.success) {
+    btn.querySelector('.like-count').textContent = data.count;
+    btn.style.color = data.liked ? '#e85d26' : 'var(--muted)';
+    btn.style.borderColor = data.liked ? '#e85d26' : 'var(--border)';
+  }
+}
+</script>
+
+</body>
+</html>

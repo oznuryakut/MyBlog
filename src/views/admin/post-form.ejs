@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  <div class="admin-header">
+    <h1><%= post ? 'Yazıyı Düzenle' : 'Yeni Yazı' %></h1>
+    <a href="/admin" class="btn-back">← Geri</a>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert-error"><%= error %></div>
+  <% } %>
+
+  <form action="/admin/yazi/<%= post ? 'duzenle/' + post._id : 'yeni' %>" method="POST" class="post-form" enctype="multipart/form-data">
+    <div class="field">
+      <label>Başlık</label>
+      <input type="text" name="title" required placeholder="Yazı başlığı" value="<%= post ? post.title : '' %>">
+    </div>
+    <div class="field">
+      <label>İçerik</label>
+      <textarea name="content" required rows="15" placeholder="Yazınızı buraya yazın..."><%= post ? post.content : '' %></textarea>
+    </div>
+    <div class="field">
+      <label>Kategori</label>
+      <select name="category">
+        <option value="">Kategori seç</option>
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat._id %>" <%= post && post.category && post.category.toString() === cat._id.toString() ? 'selected' : '' %>>
+            <%= cat.name %>
+          </option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="field">
+      <label>Etiketler (virgülle ayır)</label>
+      <input type="text" name="tags" placeholder="nodejs, express, mongodb" value="<%= post ? post.tags.join(', ') : '' %>">
+    </div>
+    <div class="field">
+      <label>Kapak Fotoğrafı</label>
+      <input type="file" name="image" accept="image/*">
+      <% if (post && post.image) { %>
+        <img src="<%= post.image %>" style="margin-top:10px;max-width:200px;border-radius:8px;">
+      <% } %>
+    </div>
+    <div class="field-check">
+      <input type="checkbox" name="published" id="published" <%= post && post.published ? 'checked' : '' %>>
+      <label for="published">Yayınla</label>
+    </div>
+    <button type="submit" class="btn-submit">Kaydet</button>
+  </form>
+</main>
+
+<%- include('../partials/footer') %>

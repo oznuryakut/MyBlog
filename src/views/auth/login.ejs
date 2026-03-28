@@ -1,0 +1,27 @@
+<%- include('../partials/header') %>
+
+<main class="auth-wrap">
+  <div class="auth-card">
+    <h1 class="auth-title">Giriş Yap</h1>
+
+    <% if (error) { %>
+      <div class="alert-error"><%= error %></div>
+    <% } %>
+
+    <form action="/auth/login" method="POST">
+      <div class="field">
+        <label>E-posta</label>
+        <input type="email" name="email" required placeholder="ornek@mail.com">
+      </div>
+      <div class="field">
+        <label>Şifre</label>
+        <input type="password" name="password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-submit">Giriş Yap</button>
+    </form>
+
+    <p class="auth-switch">Hesabın yok mu? <a href="/auth/register">Kayıt ol</a></p>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

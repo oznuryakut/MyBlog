@@ -1,0 +1,224 @@
+<%- include('partials/header') %>
+
+<main class="container">
+  <article class="post-detail">
+
+    <div class="post-detail-header">
+      <% if (post.category) { %>
+        <a href="/kategori/<%= post.category.slug %>" class="post-tag"><%= post.category.name %></a>
+      <% } %>
+      <% if (post.image) { %>
+        <img src="<%= post.image %>" style="float:right;width:200px;height:170px;object-fit:cover;border-radius:8px;margin:0 0 16px 24px;">
+      <% } %>
+      <h1 class="post-detail-title"><%= post.title %></h1>
+      <div class="post-detail-meta">
+        <div class="avatar"><%= post.author.username.charAt(0).toUpperCase() %></div>
+        <span><%= post.author.username %></span>
+        <span class="dot">·</span>
+        <span><%= new Date(post.createdAt).toLocaleDateString('tr-TR') %></span>
+      </div>
+    </div>
+
+    <div class="post-content">
+      <%- post.content %>
+    </div>
+
+  </article>
+
+  <section class="comments">
+    <h2>Yorumlar (<%= comments.length %>)</h2>
+
+    <% if (user) { %>
+      <form action="/yazi/<%= post.slug %>/yorum" method="POST" class="comment-form">
+        <textarea name="content" placeholder="Yorumunuzu yazın..." required></textarea>
+        <button type="submit">Yorum Yap</button>
+      </form>
+    <% } else { %>
+      <p class="login-prompt"><a href="/auth/login">Giriş yap</a> veya <a href="/auth/register">kayıt ol</a> yorum yapabilmek için.</p>
+    <% } %>
+
+    <% if (comments.length === 0) { %>
+      <p class="empty">Henüz yorum yok. İlk yorumu sen yap!</p>
+    <% } %>
+
+    <% comments.forEach(comment => { %>
+      <div class="comment">
+        <div class="comment-header">
+          <div class="avatar"><%= comment.author.username.charAt(0).toUpperCase() %></div>
+          <span class="comment-author"><%= comment.author.username %></span>
+          <span class="comment-date"><%= new Date(comment.createdAt).toLocaleDateString('tr-TR') %></span>
+        </div>
+        <p class="comment-content"><%= comment.content %></p>
+        <div style="position:relative;display:inline-block;margin-top:6px;">
+  <button onclick="toggleMenu('<%= comment._id %>')" 
+    style="background:none;border:none;cursor:pointer;font-size:16px;">
+    ⋮
+  </button>
+
+  <div id="menu-<%= comment._id %>" 
+    style="display:none;position:absolute;right:0;background:#fff;border:1px solid #ddd;border-radius:8px;min-width:140px;box-shadow:0 4px 10px rgba(0,0,0,0.1);z-index:10;">
+    
+    <% if (user && (user.role === 'admin' || comment.author._id.toString() === user.id.toString())) { %>
+      <div onclick="deleteComment('<%= comment._id %>')" 
+        style="padding:8px 12px;cursor:pointer;color:#e74c3c;">
+        🗑 Sil
+      </div>
+    <% } %>
+
+    <% if (user) { %>
+      <div onclick="reportComment('<%= comment._id %>')" 
+        style="padding:8px 12px;cursor:pointer;color:#555;">
+        🚩 Şikayet Et
+      </div>
+    <% } %>
+
+  </div>
+</div>
+
+  
+        <div style="margin-top:10px;display:flex;align-items:center;gap:12px;">
+          <% if (user) { %>
+            <%
+              const likeList = comment.likes ? comment.likes.map(l => l.toString()) : [];
+              const isLiked = likeList.includes(user.id.toString());
+            %>
+            <button
+              onclick="begenYorum('<%= comment._id %>', this)"
+              data-liked="<%= isLiked ? 'true' : 'false' %>"
+              style="background:none;border:1px solid var(--border);border-radius:100px;padding:4px 14px;font-size:12px;cursor:pointer;color:<%= isLiked ? '#c0392b' : 'var(--muted)' %>;transition:all 0.15s;"
+            >
+              ♥ <span class="like-count"><%= comment.likes ? comment.likes.length : 0 %></span>
+            </button>
+          <% } else { %>
+            <a href="/auth/login" style="border:1px solid var(--border);border-radius:100px;padding:4px 14px;font-size:12px;color:var(--muted);text-decoration:none;">
+              ♥ <%= comment.likes ? comment.likes.length : 0 %> · Beğenmek için giriş yap
+            </a>
+          <% } %>
+
+          <button onclick="yanıtTikla('<%= comment._id %>')" style="background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;padding:0;">
+            ↩ Yanıtla
+          </button>
+        </div>
+
+        <% if (user) { %>
+          <form id="yanit-form-<%= comment._id %>" action="/yazi/<%= post.slug %>/yorum/<%= comment._id %>/yanit" method="POST"
+            style="display:none;margin-top:12px;">
+            <textarea name="content" placeholder="Yanıtınızı yazın..." required
+              style="width:100%;border:2px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;resize:vertical;background:var(--paper);"></textarea>
+            <button type="submit" style="margin-top:8px;background:var(--ink);color:#fff;border:none;padding:8px 18px;border-radius:100px;font-size:13px;cursor:pointer;">Yanıtla</button>
+          </form>
+        <% } %>
+
+        <%
+          const commentReplies = replies.filter(r => r.parentComment && r.parentComment.toString() === comment._id.toString());
+        %>
+        <% if (commentReplies.length > 0) { %>
+          <div style="margin-top:16px;padding-left:24px;border-left:2px solid var(--border);">
+            <% commentReplies.forEach(reply => { %>
+              <div class="comment" style="border-bottom:none;padding:12px 0;">
+                <div class="comment-header">
+                  <div class="avatar" style="width:24px;height:24px;font-size:10px;"><%= reply.author.username.charAt(0).toUpperCase() %></div>
+                  <span class="comment-author"><%= reply.author.username %></span>
+                  <span class="comment-date"><%= new Date(reply.createdAt).toLocaleDateString('tr-TR') %></span>
+                </div>
+                <p class="comment-content" style="font-size:14px;"><%= reply.content %></p>
+                <div style="position:relative;display:inline-block;margin-top:4px;">
+  <button onclick="toggleMenu('<%= reply._id %>')" 
+    style="background:none;border:none;cursor:pointer;font-size:14px;">
+    ⋮
+  </button>
+
+  <div id="menu-<%= reply._id %>" 
+    style="display:none;position:absolute;right:0;background:#fff;border:1px solid #ddd;border-radius:8px;min-width:120px;box-shadow:0 4px 10px rgba(0,0,0,0.1);z-index:10;">
+    
+    <% if (user && (user.role === 'admin' || reply.author._id.toString() === user.id.toString())) { %>
+      <div onclick="deleteComment('<%= reply._id %>')" 
+        style="padding:6px 10px;cursor:pointer;color:#e74c3c;">
+        🗑 Sil
+      </div>
+    <% } %>
+
+    <% if (user) { %>
+      <div onclick="reportComment('<%= reply._id %>')" 
+        style="padding:6px 10px;cursor:pointer;">
+        🚩 Şikayet Et
+      </div>
+    <% } %>
+
+  </div>
+</div>
+  
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+
+      </div>
+    <% }) %>
+
+  </section>
+
+</main>
+
+<script>
+  const loggedIn = <%- user ? 'true' : 'false' %>;
+
+  function yanıtTikla(id) {
+    if (loggedIn) {
+      const form = document.getElementById('yanit-form-' + id);
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    } else {
+      window.location.href = '/auth/login';
+    }
+  }
+  function toggleMenu(id) {
+  const menu = document.getElementById('menu-' + id);
+  const isOpen = menu.style.display === 'block';
+
+  // tüm menüleri kapat
+  document.querySelectorAll('[id^="menu-"]').forEach(m => m.style.display = 'none');
+
+  menu.style.display = isOpen ? 'none' : 'block';
+}
+
+// dışarı tıklayınca kapansın
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('[onclick^="toggleMenu"]')) {
+    document.querySelectorAll('[id^="menu-"]').forEach(m => m.style.display = 'none');
+  }
+});
+
+function deleteComment(id) {
+  if (!confirm("Yorumu silmek istediğine emin misin?")) return;
+
+  fetch('/yorum/' + id, {
+    method: 'DELETE'
+  })
+  .then(async res => {
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.message);
+      location.reload();
+    } else {
+      alert(data.message || "Hata oluştu");
+    }
+  })
+  .catch(() => {
+    alert("Hata oluştu");
+  });
+}
+
+
+  async function begenYorum(id, btn) {
+    const res = await fetch('/yorum/' + id + '/begen', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      btn.querySelector('.like-count').textContent = data.count;
+      btn.style.color = data.liked ? '#c0392b' : 'var(--muted)';
+      btn.style.borderColor = data.liked ? '#c0392b' : 'var(--border)';
+      btn.dataset.liked = data.liked ? 'true' : 'false';
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>

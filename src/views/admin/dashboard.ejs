@@ -1,0 +1,95 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+  <div class="admin-header">
+    <h1>Admin Panel</h1>
+    <a href="/admin/yazi/yeni" class="btn-new">+ Yeni Yazı</a>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Yazı</div>
+      <div class="stat-val"><%= postCount %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Yorum</div>
+      <div class="stat-val"><%= commentCount %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Kullanıcı</div>
+      <div class="stat-val"><%= userCount %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Kategori</div>
+      <div class="stat-val"><%= categoryCount %></div>
+    </div>
+  </div>
+
+  <div class="admin-grid">
+
+    <div class="admin-panel">
+      <h2>Yazılar</h2>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Başlık</th>
+            <th>Kategori</th>
+            <th>Durum</th>
+            <th>Tarih</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% posts.forEach(post => { %>
+            <tr>
+              <td><%= post.title %></td>
+              <td><%= post.category ? post.category.name : '—' %></td>
+              <td>
+                <span class="badge <%= post.published ? 'badge-green' : 'badge-amber' %>">
+                  <%= post.published ? 'Yayında' : 'Taslak' %>
+                </span>
+              </td>
+              <td><%= new Date(post.createdAt).toLocaleDateString('tr-TR') %></td>
+              <td class="actions">
+                <a href="/admin/yazi/duzenle/<%= post._id %>" class="action-edit">Düzenle</a>
+                <form action="/admin/yazi/sil/<%= post._id %>" method="POST" style="display:inline">
+                  <button type="submit" class="action-delete" onclick="return confirm('Emin misin?')">Sil</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="admin-panel">
+      <h2>Kategori Ekle</h2>
+      <form action="/admin/kategori/ekle" method="POST">
+        <div class="field">
+          <label>Kategori Adı</label>
+          <input type="text" name="name" required placeholder="Teknoloji">
+        </div>
+        <div class="field">
+          <label>Açıklama</label>
+          <input type="text" name="description" placeholder="Opsiyonel">
+        </div>
+        <button type="submit" class="btn-submit">Ekle</button>
+      </form>
+
+      <h3 style="margin-top:24px;font-size:15px;border-top:1px solid var(--border);padding-top:16px;">Mevcut Kategoriler</h3>
+      <ul style="list-style:none;margin-top:12px;">
+        <% categories.forEach(cat => { %>
+          <li style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:14px;"><%= cat.name %></span>
+            <form action="/admin/kategori/sil/<%= cat._id %>" method="POST" style="margin:0">
+              <button type="submit" class="action-delete" onclick="return confirm('Emin misin?')">Sil</button>
+            </form>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

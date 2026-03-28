@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">MyBlog</a>
+    <form action="/ara" method="GET" style="display:flex;align-items:center;gap:8px;">
+  <input type="text" name="q" placeholder="Yazı ara..." 
+    style="border:1px solid var(--border);border-radius:100px;padding:6px 16px;font-size:13px;outline:none;background:var(--paper);color:var(--ink);width:200px;">
+  <button type="submit" style="background:var(--ink);color:#fff;border:none;border-radius:100px;padding:6px 14px;font-size:13px;cursor:pointer;">Ara</button>
+</form>
+    <div class="nav-links">
+      <% if (user) { %>
+        <span class="nav-user">Merhaba, <%= user.username %></span>
+        <% if (user.role === 'admin') { %>
+          <a href="/admin" class="nav-link">Admin</a>
+        <% } %>
+        <a href="/auth/logout" class="nav-link">Çıkış</a>
+      <% } else { %>
+        <a href="/auth/login" class="nav-link">Giriş</a>
+        <a href="/auth/register" class="nav-btn">Kayıt Ol</a>
+      <% } %>
+    </div>
+  </div>
+</nav>
