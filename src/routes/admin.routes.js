@@ -1,7 +1,6 @@
 const { v2: cloudinary } = require('cloudinary');
 
 const upload = require('../config/cloudinary');
-const upload = require('../middleware/upload.js');
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/post.model');
