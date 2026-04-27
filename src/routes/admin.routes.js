@@ -88,7 +88,7 @@ router.post('/yazi/duzenle/:id', upload.single('image'), async (req, res) => {
     post.category = category || null;
     post.tags = tags ? tags.split(',').map(t => t.trim()) : [];
     post.published = published === 'on';
-    if (req.file) post.image = '/uploads/' + req.file.filename;
+    if (req.file) post.image = req.file.path; // BURASI DOĞRU (Cloudinary URL'si)
     await post.save();
     res.redirect('/admin');
   } catch (err) {
