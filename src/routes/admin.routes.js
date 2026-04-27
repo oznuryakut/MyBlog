@@ -1,3 +1,6 @@
+const { v2: cloudinary } = require('cloudinary');
+
+const upload = require('../config/cloudinary');
 const upload = require('../middleware/upload.js');
 const express = require('express');
 const router = express.Router();
@@ -42,6 +45,10 @@ router.get('/yazi/yeni', async (req, res) => {
 router.post('/yazi/yeni', upload.single('image'), async (req, res) => {
   try {
     const { title, content, category, tags, published } = req.body;
+    
+    // Değişen kısım burası: req.file.path artık Cloudinary URL'sini tutuyor
+    const imageUrl = req.file ? req.file.path : null;
+
     await Post.create({
       title,
       content,
@@ -50,8 +57,9 @@ router.post('/yazi/yeni', upload.single('image'), async (req, res) => {
       tags: tags ? tags.split(',').map(t => t.trim()) : [],
       published: published === 'on',
       author: req.session.user.id,
-      image: req.file ? '/uploads/' + req.file.filename : null
+      image: imageUrl // Artık veritabanına "https://res.cloudinary.com/..." şeklinde kaydedilecek
     });
+
     res.redirect('/admin');
   } catch (err) {
     console.error('YAZI KAYIT HATASI:', err.message);
