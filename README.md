@@ -15,8 +15,8 @@ Bu proje, Node.js ve Express kullanılarak geliştirilmiş basit bir blog uygula
 
 - Node.js
 - Express.js
-- EJS (veya kullandığın template neyse onu yaz)
-- MongoDB / MySQL (hangisini kullanıyorsan)
+- EJS 
+- MongoDB
 - HTML, CSS, JavaScript
 
 ## 📦 Kurulum
